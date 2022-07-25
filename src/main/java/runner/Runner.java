@@ -1,19 +1,32 @@
 package runner;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Scanner;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.Scanner;
 
 import com.gargoylesoftware.htmlunit.*;
 import com.gargoylesoftware.htmlunit.html.*;
+import services.SingleQuoteService;
 
-public class FolioRetriever {
+public class Runner {
 
-    public static void main(String[] args) {
+    static SingleQuoteService singleQuoteService;
+    static {
+        try {
+            singleQuoteService = new SingleQuoteService();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         // Portfolio
         String[] owned = { "CORE", "NFLX", "MSFT", "F" };
         Double[] quantityOwned = { 5000.0, 1.0, 10.0, 37.0 };
@@ -21,9 +34,9 @@ public class FolioRetriever {
         clearScreen();
         welcome();
 
-        String output = "";
+        String output;
         Scanner inquiry = new Scanner(System.in);
-        String result = inquiry.next().toUpperCase().toString();
+        String result = inquiry.next().toUpperCase();
         inquiry.close();
 
         if (result.equals("$")) {
@@ -31,12 +44,24 @@ public class FolioRetriever {
             output = retrieveFolio(owned, quantityOwned);
         } else {
             System.out.println("Loading Ticker, please wait... ");
-            output = getTickerTitle(result) + getTickerPrice(result);
+            output = singleQuoteService.getTickerTitle(result, getApiKey()) +
+                    singleQuoteService.getTickerPrice(result, getApiKey());
         }
 
         clearScreen();
         System.out.println(output);
         System.out.println("");
+    }
+
+    private static String getApiKey() throws FileNotFoundException {
+        File file = new File("api-key.txt");
+        Scanner scanner = new Scanner(file);
+
+        if (scanner.hasNext()) {
+            return scanner.next();
+        } else {
+            return null;
+        }
     }
 
     private static String getTickerPrice(String passedInTicker) {
@@ -58,7 +83,7 @@ public class FolioRetriever {
             price = page.asNormalizedText();
 
             int firstIndex = price.indexOf("9M");
-            price = price.substring(firstIndex, firstIndex + 45).toString();
+            price = price.substring(firstIndex, firstIndex + 45);
             price = price.replace("-", "+");
 
             int secondIndex = price.indexOf("(+");
@@ -67,7 +92,7 @@ public class FolioRetriever {
             int lastIndex = price.indexOf("+");
             price = price.substring(0, lastIndex).trim();
             price = price.replace("9M", "");
-            price = price.replaceAll("[^0-9.]", "");
+            price = price.replaceAll("[^\\d.]", "");
 
             webClient.getCurrentWindow().getJobManager().removeAllJobs();
             webClient.close();
@@ -83,41 +108,8 @@ public class FolioRetriever {
         return price;
     }
 
-    private static String getTickerTitle(String passedInTicker) {
-        if (passedInTicker.equals("CORE")) {
-            return "'CORE' represents dollar amount available to trade and is equal to one (1) US Dollar: ";
-        }
-
-        String url_link = "https://finance.yahoo.com/quote/" + passedInTicker + "/history";
-        String title = "";
-
-        WebClient webClient = new WebClient(BrowserVersion.FIREFOX);
-        webClient.getOptions().setCssEnabled(false);
-        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setJavaScriptEnabled(false);
-
-        try {
-            HtmlPage page = webClient.getPage(url_link);
-            title = page.getTitleText().toString().replace(" Stock Historical Prices & Data - Yahoo Finance", "")
-                    + ":".trim() + " ";
-
-            webClient.getCurrentWindow().getJobManager().removeAllJobs();
-            webClient.close();
-
-        } catch (IOException e) {
-            clearScreen();
-            System.out.println("An unexpected error occurred: " + e);
-        } catch (StringIndexOutOfBoundsException e) {
-            clearScreen();
-            System.out.println("Error: Data could not be returned. One or more tickers invalid.");
-        }
-
-        return title;
-    }
-
     private static String retrieveFolio(String[] owned, Double[] quantityOwned) {
-        ArrayList<Double> prices = new ArrayList<Double>();
+        ArrayList<Double> prices = new ArrayList<>();
         for (String ticker : owned) {
             try {
                 prices.add((new BigDecimal(getTickerPrice(ticker))).doubleValue());
@@ -127,7 +119,7 @@ public class FolioRetriever {
         }
 
         int iterate = 0;
-        ArrayList<Double> totals = new ArrayList<Double>();
+        ArrayList<Double> totals = new ArrayList<>();
         for (Double q : quantityOwned) {
             totals.add(q * prices.get(iterate));
             iterate++;
@@ -156,6 +148,6 @@ public class FolioRetriever {
     private static void sleeper() {
         try {
             Thread.sleep(1100L);
-        } catch (InterruptedException e) { }
+        } catch (InterruptedException ignored) { }
     }
 }
