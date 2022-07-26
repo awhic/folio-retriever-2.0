@@ -11,8 +11,6 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Scanner;
 
-import com.gargoylesoftware.htmlunit.*;
-import com.gargoylesoftware.htmlunit.html.*;
 import services.SingleQuoteService;
 
 public class Runner {
@@ -44,7 +42,7 @@ public class Runner {
             output = retrieveFolio(owned, quantityOwned);
         } else {
             System.out.println("Loading Ticker, please wait... ");
-            output = singleQuoteService.getTickerTitle(result, getApiKey()) +
+            output = singleQuoteService.getTickerTitle(result, getApiKey()) + ": " +
                     singleQuoteService.getTickerPrice(result, getApiKey());
         }
 
@@ -64,57 +62,15 @@ public class Runner {
         }
     }
 
-    private static String getTickerPrice(String passedInTicker) {
-        if (passedInTicker.equals("CORE")) {
-            return "1.00";
-        }
-
-        String url_link = "https://finance.yahoo.com/quote/" + passedInTicker + "/history";
-        String price = "";
-
-        WebClient webClient = new WebClient(BrowserVersion.FIREFOX);
-        webClient.getOptions().setCssEnabled(false);
-        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setJavaScriptEnabled(false);
-
-        try {
-            HtmlPage page = webClient.getPage(url_link);
-            price = page.asNormalizedText();
-
-            int firstIndex = price.indexOf("9M");
-            price = price.substring(firstIndex, firstIndex + 45);
-            price = price.replace("-", "+");
-
-            int secondIndex = price.indexOf("(+");
-            price = price.substring(0, secondIndex);
-
-            int lastIndex = price.indexOf("+");
-            price = price.substring(0, lastIndex).trim();
-            price = price.replace("9M", "");
-            price = price.replaceAll("[^\\d.]", "");
-
-            webClient.getCurrentWindow().getJobManager().removeAllJobs();
-            webClient.close();
-
-        } catch (IOException e) {
-            clearScreen();
-            System.out.println("An unexpected error occurred: " + e);
-        } catch (StringIndexOutOfBoundsException e) {
-            clearScreen();
-            System.out.println("Error: Data could not be returned. Input may be invalid.");
-        }
-
-        return price;
-    }
-
     private static String retrieveFolio(String[] owned, Double[] quantityOwned) {
         ArrayList<Double> prices = new ArrayList<>();
         for (String ticker : owned) {
             try {
-                prices.add((new BigDecimal(getTickerPrice(ticker))).doubleValue());
+                prices.add((new BigDecimal(singleQuoteService.getTickerPrice(ticker, getApiKey()))).doubleValue());
             } catch (NumberFormatException e) {
                 System.out.println("Error, bad ticker in list.");
+            } catch (URISyntaxException | InterruptedException | IOException e) {
+                throw new RuntimeException(e);
             }
         }
 

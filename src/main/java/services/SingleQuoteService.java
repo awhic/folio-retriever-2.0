@@ -1,39 +1,67 @@
 package services;
 
+import mapper.QuoteMapper;
+import model.Data;
+import model.Quote;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Objects;
 
 public class SingleQuoteService {
-
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_2)
+    private final OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
+
+    private final QuoteMapper quoteMapper = new QuoteMapper();
 
     public SingleQuoteService() throws URISyntaxException { }
 
-    private String getTicker(String ticker, String token) throws URISyntaxException, IOException, InterruptedException {
+    private String getTicker(String ticker, String token) throws IOException {
 
-        HttpRequest request;
-        request = HttpRequest.newBuilder()
-                .uri(new URI("https://api.stockdata.org/v1/data/quote?symbols=" + ticker + "&api_token=" + token))
-                .GET()
-                .build();
+        HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse("https://api.stockdata.org/v1/data/quote")).newBuilder();
+        httpBuilder.addQueryParameter("api_token", token);
+        httpBuilder.addQueryParameter("symbols", ticker);
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        Request request = new Request.Builder().url(httpBuilder.build()).build();
 
-        return response.body();
+        try (Response response = client.newCall(request).execute()) {
+            assert response.body() != null;
+            return response.body().string();
+        }
     }
 
-    public String getTickerTitle(String ticker, String token) throws URISyntaxException, IOException, InterruptedException {
-        return getTicker(ticker, token);
+    public String getTickerTitle(String ticker, String token) throws IOException {
+        Quote quote = quoteMapper.mapQuote(getTicker(ticker, token));
+        if (quote.getMeta().getReturned() == 1) {
+            Data[] data = quote.getData();
+            return data[0].getName();
+        } else {
+            throw new IOException("Error: Ticker invalid.");
+        }
     }
 
     public String getTickerPrice(String ticker, String token) throws URISyntaxException, IOException, InterruptedException {
-        return getTicker(ticker, token);
+
+        Locale usa = new Locale("en", "US");
+        NumberFormat dollarFormat = NumberFormat.getCurrencyInstance(usa);
+
+        if (Objects.equals(ticker, "CORE")) {
+            return dollarFormat.format(1.00);
+        }
+        Quote quote = quoteMapper.mapQuote(getTicker(ticker, token));
+        if (quote.getMeta().getReturned() == 1) {
+            Data[] data = quote.getData();
+
+            return dollarFormat.format(data[0].getPrice());
+        } else {
+            throw new IOException("Error: Ticker invalid.");
+        }
     }
 
 
