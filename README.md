@@ -9,16 +9,13 @@ Instructions for quickly running the application:
 - Pull down the repository in a git bash with the below command:
 
  ```bash
- git clone https://github.com/awhic/folio-retriever.git
+ git clone https://github.com/awhic/folio-retriever-2.0.git
  ```
 - Pick one of the following:
   - In Visual Studio Code or any IDE of your choosing, under Maven > ft > Lifecycle, run 'clean' and 'install', with success.
   - Open a terminal (can also be in a git bash) and run the following commands with success:
   
       ```bash
-      mvn clean
-      ```
-      ```bash
-      mvn install
+      mvn clean install
       ```
 - Run the application!

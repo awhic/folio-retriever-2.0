@@ -9,7 +9,6 @@ public class QuoteMapper {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-
     public Quote mapQuote(String json) throws JsonProcessingException {
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         return objectMapper.readValue(json, Quote.class);
