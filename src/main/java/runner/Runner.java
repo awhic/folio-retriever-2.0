@@ -11,7 +11,11 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Scanner;
 
-import services.SingleQuoteService;
+import exception.ApiLimitException;
+import exception.InvalidApiTokenException;
+import exception.InvalidTickerException;
+import service.SingleQuoteService;
+import util.ConsoleUtils;
 
 public class Runner {
 
@@ -24,31 +28,72 @@ public class Runner {
         }
     }
 
-    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
+    static ConsoleUtils consoleUtils = new ConsoleUtils();
+    static NumberFormat dollarFormat = NumberFormat.getCurrencyInstance(new Locale("en", "US"));
+
+    public static void main(String[] args) throws URISyntaxException, InterruptedException {
         // Portfolio
         String[] owned = { "CORE", "NFLX", "MSFT", "F" };
         Double[] quantityOwned = { 5000.0, 1.0, 10.0, 37.0 };
 
-        clearScreen();
-        welcome();
+        consoleUtils.clearScreen();
+        consoleUtils.welcome();
 
-        String output;
+        String output = "";
         Scanner inquiry = new Scanner(System.in);
-        String result = inquiry.next().toUpperCase();
-        inquiry.close();
+        String result;
+        Boolean tokenWorked = true;
+        do {
+            result = inquiry.next().toUpperCase();
 
-        if (result.equals("$")) {
-            System.out.println("Loading Your Portfolio, please wait...");
-            output = retrieveFolio(owned, quantityOwned);
-        } else {
-            System.out.println("Loading Ticker, please wait... ");
-            output = singleQuoteService.getTickerTitle(result, getApiKey()) + ": " +
-                    singleQuoteService.getTickerPrice(result, getApiKey());
-        }
+            if (result.equals("$")) {
+                System.out.println("Loading Your Portfolio, please wait...");
+                System.out.println("");
+                try {
+                    output = retrieveFolio(owned, quantityOwned);
+                } catch (ApiLimitException e) {
+                    consoleUtils.clearScreen();
+                    System.out.println("You have reached your API limit of 100 calls per 24 hours.");
+                    result = "999";
+                } catch (InvalidApiTokenException e) {
+                    System.out.println("API Token is missing or invalid.");
+                    result = "999";
+                    tokenWorked = false;
+                }
+            } else if (result.equals("999")) {
+                consoleUtils.clearScreen();
+                inquiry.close();
+                output = "Exiting...";
+            } else {
+                consoleUtils.clearScreen();
+                System.out.println("");
+                try {
+                    System.out.println("Loading Ticker, please wait... ");
+                    System.out.println("");
+                    output = singleQuoteService.getTickerTitle(result, getApiKey()) + ": " +
+                           dollarFormat.format(singleQuoteService.getTickerPrice(result, getApiKey()));
+                } catch (IOException e) {
+                    consoleUtils.clearScreen();
+                    System.out.println("Error: Invalid Ticker.");
+                } catch (ApiLimitException e) {
+                    consoleUtils.clearScreen();
+                    System.out.println("You have reached your API limit of 100 calls per 24 hours.");
+                    result = "999";
+                } catch (InvalidApiTokenException e) {
+                    System.out.println("API Token is missing or invalid.");
+                    result = "999";
+                    tokenWorked = false;
+                }
+            }
 
-        clearScreen();
-        System.out.println(output);
-        System.out.println("");
+            consoleUtils.clearScreen();
+            if (!result.equals("999") && tokenWorked) {
+                System.out.println(output);
+                System.out.println("");
+                System.out.println("What else can I do for you? " +
+                        "(Options: Quote (ex., MSFT), Portfolio ('$'), Exit ('999'): ");
+            }
+        } while (!result.equals("999"));
     }
 
     private static String getApiKey() throws FileNotFoundException {
@@ -58,7 +103,7 @@ public class Runner {
         if (scanner.hasNext()) {
             return scanner.next();
         } else {
-            return null;
+            throw new InvalidApiTokenException();
         }
     }
 
@@ -66,11 +111,13 @@ public class Runner {
         ArrayList<Double> prices = new ArrayList<>();
         for (String ticker : owned) {
             try {
-                prices.add((new BigDecimal(singleQuoteService.getTickerPrice(ticker, getApiKey()))).doubleValue());
-            } catch (NumberFormatException e) {
-                System.out.println("Error, bad ticker in list.");
-            } catch (URISyntaxException | InterruptedException | IOException e) {
-                throw new RuntimeException(e);
+                prices.add((BigDecimal.valueOf(singleQuoteService.getTickerPrice(ticker, getApiKey()))).doubleValue());
+            } catch (InvalidTickerException e) {
+                System.out.println("Error: One or more ticker symbols provided are invalid.");
+            } catch (URISyntaxException | InterruptedException | IOException | IndexOutOfBoundsException e) {
+                throw new RuntimeException("Unexpected Error Occurred. Exiting...");
+            } catch (ApiLimitException e) {
+                throw new ApiLimitException();
             }
         }
 
@@ -87,23 +134,5 @@ public class Runner {
         NumberFormat dollarFormat = NumberFormat.getCurrencyInstance(usa);
 
         return "Your Current Portfolio Value: " + dollarFormat.format(output);
-    }
-
-    private static void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-    }
-
-    private static void welcome() {
-        System.out.println("Welcome to Folio Retriever.");
-        sleeper();
-        System.out.println("");
-        System.out.println("Enter a Stock Ticker *OR* enter '$' to see your portfolio value: ");
-    }
-
-    private static void sleeper() {
-        try {
-            Thread.sleep(1100L);
-        } catch (InterruptedException ignored) { }
     }
 }
