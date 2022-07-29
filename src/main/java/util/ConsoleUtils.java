@@ -16,7 +16,7 @@ public class ConsoleUtils {
         System.out.println("To exit, enter '999': ");
     }
 
-    public static void sleeper() {
+    public void sleeper() {
         try {
             Thread.sleep(1100L);
         } catch (InterruptedException ignored) { }
