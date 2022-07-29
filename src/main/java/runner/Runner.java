@@ -1,20 +1,22 @@
 package runner;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Locale;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Scanner;
 
-import services.SingleQuoteService;
+import code.PortfolioRetriever;
+import exception.ApiLimitException;
+import exception.InvalidApiTokenException;
+import exception.InvalidTickerException;
+import service.SingleQuoteService;
+import util.ApiUtils;
+import util.ConsoleUtils;
 
 public class Runner {
-
     static SingleQuoteService singleQuoteService;
     static {
         try {
@@ -23,87 +25,75 @@ public class Runner {
             throw new RuntimeException(e);
         }
     }
+    static ConsoleUtils consoleUtils = new ConsoleUtils();
+    static NumberFormat dollarFormat = NumberFormat.getCurrencyInstance(new Locale("en", "US"));
+    static ApiUtils apiUtils = new ApiUtils();
 
-    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
-        // Portfolio
-        String[] owned = { "CORE", "NFLX", "MSFT", "F" };
-        Double[] quantityOwned = { 5000.0, 1.0, 10.0, 37.0 };
+    public static void main(String[] args) throws URISyntaxException, InterruptedException {
+        // Portfolio - temporary
+        String[] owned = { "NFLX", "MSFT", "F" };
+        Double[] quantityOwned = { 1.0, 10.0, 37.0 };
+        double coreValue = 5000.00;
 
-        clearScreen();
-        welcome();
+        consoleUtils.welcome();
 
-        String output;
+        String output = "";
         Scanner inquiry = new Scanner(System.in);
-        String result = inquiry.next().toUpperCase();
-        inquiry.close();
+        String result;
+        boolean tokenWorked = true;
+        do {
+            result = inquiry.next().toUpperCase();
 
-        if (result.equals("$")) {
-            System.out.println("Loading Your Portfolio, please wait...");
-            output = retrieveFolio(owned, quantityOwned);
-        } else {
-            System.out.println("Loading Ticker, please wait... ");
-            output = singleQuoteService.getTickerTitle(result, getApiKey()) + ": " +
-                    singleQuoteService.getTickerPrice(result, getApiKey());
-        }
-
-        clearScreen();
-        System.out.println(output);
-        System.out.println("");
-    }
-
-    private static String getApiKey() throws FileNotFoundException {
-        File file = new File("api-key.txt");
-        Scanner scanner = new Scanner(file);
-
-        if (scanner.hasNext()) {
-            return scanner.next();
-        } else {
-            return null;
-        }
-    }
-
-    private static String retrieveFolio(String[] owned, Double[] quantityOwned) {
-        ArrayList<Double> prices = new ArrayList<>();
-        for (String ticker : owned) {
-            try {
-                prices.add((new BigDecimal(singleQuoteService.getTickerPrice(ticker, getApiKey()))).doubleValue());
-            } catch (NumberFormatException e) {
-                System.out.println("Error, bad ticker in list.");
-            } catch (URISyntaxException | InterruptedException | IOException e) {
-                throw new RuntimeException(e);
+            if (result.equals("$")) {
+                System.out.println("Loading Your Portfolio, please wait...");
+                System.out.println("");
+                try {
+                    output = PortfolioRetriever.retrieveFolio(owned, quantityOwned, coreValue, singleQuoteService, apiUtils.getApiKey(), dollarFormat);
+                } catch (ApiLimitException e) {
+                    System.out.println("You have reached your API limit of 100 calls per 24 hours, or 3 symbols per request.");
+                    result = "999";
+                } catch (InvalidApiTokenException e) {
+                    System.out.println("API Token is missing or invalid.");
+                    result = "999";
+                    tokenWorked = false;
+                }
+            } else if (result.equals("999")) {
+                inquiry.close();
+                output = "Exiting...";
+            } else {
+                System.out.println("");
+                try {
+                    System.out.println("Loading Ticker, please wait... ");
+                    System.out.println("");
+                    output = singleQuoteService.getTickerTitle(result, apiUtils.getApiKey()) + ": " +
+                           dollarFormat.format(singleQuoteService.getTickerPrice(result, apiUtils.getApiKey()));
+                } catch (InvalidTickerException e) {
+                    output = "";
+                    System.out.println("Error: Invalid Ticker.");
+                    System.out.println();
+                } catch (ApiLimitException e) {
+                    output = "";
+                    System.out.println("You have reached your API limit of 100 calls per 24 hours.");
+                    result = "999";
+                } catch (InvalidApiTokenException | FileNotFoundException e) {
+                    System.out.println("API Token is missing or invalid.");
+                    result = "999";
+                    tokenWorked = false;
+                    output = "";
+                } catch (IOException e) {
+                    throw new RuntimeException("An Unexpected Error Occurred. Exiting...");
+                }
             }
-        }
 
-        int iterate = 0;
-        ArrayList<Double> totals = new ArrayList<>();
-        for (Double q : quantityOwned) {
-            totals.add(q * prices.get(iterate));
-            iterate++;
-        }
-
-        Double output = totals.stream().mapToDouble(i -> i).sum();
-
-        Locale usa = new Locale("en", "US");
-        NumberFormat dollarFormat = NumberFormat.getCurrencyInstance(usa);
-
-        return "Your Current Portfolio Value: " + dollarFormat.format(output);
-    }
-
-    private static void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-    }
-
-    private static void welcome() {
-        System.out.println("Welcome to Folio Retriever.");
-        sleeper();
-        System.out.println("");
-        System.out.println("Enter a Stock Ticker *OR* enter '$' to see your portfolio value: ");
-    }
-
-    private static void sleeper() {
-        try {
-            Thread.sleep(1100L);
-        } catch (InterruptedException ignored) { }
+            if (!result.equals("999") && tokenWorked) {
+                if (!output.equals("")) {
+                    System.out.println(output);
+                    System.out.println("");
+                }
+                consoleUtils.sleeper();
+                System.out.println("What else can I do for you? " +
+                        "(Options: Quote (ex., MSFT), Portfolio ('$'), Exit ('999'): ");
+            }
+        } while (!result.equals("999"));
     }
 }

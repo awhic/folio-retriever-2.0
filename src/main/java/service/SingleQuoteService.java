@@ -1,7 +1,8 @@
-package services;
+package service;
 
+import exception.ApiLimitException;
+import exception.InvalidTickerException;
 import mapper.QuoteMapper;
-import model.Data;
 import model.Quote;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -10,8 +11,6 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.Objects;
 
 public class SingleQuoteService {
@@ -38,31 +37,29 @@ public class SingleQuoteService {
 
     public String getTickerTitle(String ticker, String token) throws IOException {
         Quote quote = quoteMapper.mapQuote(getTicker(ticker, token));
+
+        if (quote.getMeta() == null) {
+            throw new ApiLimitException();
+        }
+
         if (quote.getMeta().getReturned() == 1) {
-            Data[] data = quote.getData();
-            return data[0].getName();
+            return quote.getData()[0].getName();
         } else {
-            throw new IOException("Error: Ticker invalid.");
+            throw new InvalidTickerException();
         }
     }
 
-    public String getTickerPrice(String ticker, String token) throws URISyntaxException, IOException, InterruptedException {
-
-        Locale usa = new Locale("en", "US");
-        NumberFormat dollarFormat = NumberFormat.getCurrencyInstance(usa);
-
-        if (Objects.equals(ticker, "CORE")) {
-            return dollarFormat.format(1.00);
-        }
+    public Double getTickerPrice(String ticker, String token) throws URISyntaxException, IOException, InterruptedException {
         Quote quote = quoteMapper.mapQuote(getTicker(ticker, token));
-        if (quote.getMeta().getReturned() == 1) {
-            Data[] data = quote.getData();
 
-            return dollarFormat.format(data[0].getPrice());
+        if (quote.getMeta() == null) {
+            throw new ApiLimitException();
+        }
+
+        if (quote.getMeta().getReturned() == 1) {
+            return quote.getData()[0].getPrice();
         } else {
-            throw new IOException("Error: Ticker invalid.");
+            throw new InvalidTickerException();
         }
     }
-
-
 }
