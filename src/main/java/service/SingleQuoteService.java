@@ -1,8 +1,8 @@
 package service;
 
 import exception.ApiLimitException;
+import exception.InvalidTickerException;
 import mapper.QuoteMapper;
-import model.Data;
 import model.Quote;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -37,37 +37,29 @@ public class SingleQuoteService {
 
     public String getTickerTitle(String ticker, String token) throws IOException {
         Quote quote = quoteMapper.mapQuote(getTicker(ticker, token));
+
         if (quote.getMeta() == null) {
             throw new ApiLimitException();
         }
 
         if (quote.getMeta().getReturned() == 1) {
-            Data[] data = quote.getData();
-            return data[0].getName();
+            return quote.getData()[0].getName();
         } else {
-            throw new IOException("Error: Ticker invalid.");
+            throw new InvalidTickerException();
         }
     }
 
     public Double getTickerPrice(String ticker, String token) throws URISyntaxException, IOException, InterruptedException {
-
-        if (Objects.equals(ticker, "CORE")) {
-            return 1.00;
-        }
-
         Quote quote = quoteMapper.mapQuote(getTicker(ticker, token));
+
         if (quote.getMeta() == null) {
             throw new ApiLimitException();
         }
 
         if (quote.getMeta().getReturned() == 1) {
-            Data[] data = quote.getData();
-
-            return data[0].getPrice();
+            return quote.getData()[0].getPrice();
         } else {
-            throw new RuntimeException("Error: Ticker invalid.");
+            throw new InvalidTickerException();
         }
     }
-
-
 }
