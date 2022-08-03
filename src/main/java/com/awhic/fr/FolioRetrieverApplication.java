@@ -1,4 +1,4 @@
-package runner;
+package com.awhic.fr;
 
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
@@ -8,15 +8,15 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Scanner;
 
-import code.PortfolioRetriever;
-import exception.ApiLimitException;
-import exception.InvalidApiTokenException;
-import exception.InvalidTickerException;
-import service.SingleQuoteService;
-import util.ApiUtils;
-import util.ConsoleUtils;
+import com.awhic.fr.code.PortfolioRetriever;
+import com.awhic.fr.code.exception.ApiLimitException;
+import com.awhic.fr.code.exception.InvalidApiTokenException;
+import com.awhic.fr.code.exception.InvalidTickerException;
+import com.awhic.fr.service.SingleQuoteService;
+import com.awhic.fr.util.ApiUtils;
+import com.awhic.fr.util.ConsoleUtils;
 
-public class Runner {
+public class FolioRetrieverApplication {
     static SingleQuoteService singleQuoteService;
     static {
         try {
@@ -30,6 +30,7 @@ public class Runner {
     static ApiUtils apiUtils = new ApiUtils();
 
     public static void main(String[] args) throws URISyntaxException, InterruptedException {
+
         // Portfolio - temporary
         String[] owned = { "NFLX", "MSFT", "F" };
         Double[] quantityOwned = { 1.0, 10.0, 37.0 };

@@ -1,4 +1,4 @@
-package util;
+package com.awhic.fr.util;
 
 public class ConsoleUtils {
     public void clearScreen() {
