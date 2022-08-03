@@ -1,9 +1,9 @@
-package mapper;
+package com.awhic.fr.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.Quote;
+import com.awhic.fr.model.Quote;
 
 public class QuoteMapper {
 

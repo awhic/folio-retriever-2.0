@@ -1,8 +1,8 @@
-package code;
+package com.awhic.fr.code;
 
-import exception.ApiLimitException;
-import exception.InvalidTickerException;
-import service.SingleQuoteService;
+import com.awhic.fr.code.exception.ApiLimitException;
+import com.awhic.fr.code.exception.InvalidTickerException;
+import com.awhic.fr.service.SingleQuoteService;
 
 import java.io.IOException;
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-package model;
+package com.awhic.fr.model;
 
 public class Meta {
     private long requested;

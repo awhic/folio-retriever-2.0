@@ -1,6 +1,6 @@
-package util;
+package com.awhic.fr.util;
 
-import exception.InvalidApiTokenException;
+import com.awhic.fr.code.exception.InvalidApiTokenException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,7 +15,7 @@ public class ApiUtils {
         }
     }
     private static String apiKey() throws FileNotFoundException {
-        File file = new File("api-key.txt");
+        File file = new File("src/main/resources/api-key.txt");
         Scanner scanner = new Scanner(file);
 
         if (scanner.hasNext()) {

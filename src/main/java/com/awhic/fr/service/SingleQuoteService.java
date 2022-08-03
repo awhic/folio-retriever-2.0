@@ -1,9 +1,9 @@
-package service;
+package com.awhic.fr.service;
 
-import exception.ApiLimitException;
-import exception.InvalidTickerException;
-import mapper.QuoteMapper;
-import model.Quote;
+import com.awhic.fr.code.exception.ApiLimitException;
+import com.awhic.fr.code.exception.InvalidTickerException;
+import com.awhic.fr.mapper.QuoteMapper;
+import com.awhic.fr.model.Quote;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
