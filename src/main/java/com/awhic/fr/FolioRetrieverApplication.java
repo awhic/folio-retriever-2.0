@@ -42,10 +42,11 @@ public class FolioRetrieverApplication {
         Scanner inquiry = new Scanner(System.in);
         String result;
         boolean tokenWorked = true;
+        boolean helpFlag = false;
         do {
             result = inquiry.next().toUpperCase();
 
-            if (result.equals("$")) {
+            if (result.equals("-p".toUpperCase())) {
                 System.out.println("Loading Your Portfolio, please wait...");
                 System.out.println("");
                 try {
@@ -58,10 +59,25 @@ public class FolioRetrieverApplication {
                     result = "999";
                     tokenWorked = false;
                 }
-            } else if (result.equals("999")) {
+            } else if (result.equals("-a".toUpperCase())) {
+                //DEVELOPMENT
+                consoleUtils.help();
+                output = "";
+                helpFlag = true;
+            } else if (result.equals("-e".toUpperCase())) {
+                //DEVELOPMENT
+                consoleUtils.help();
+                output = "";
+                helpFlag = true;
+            } else if (result.equals("-help".toUpperCase())) {
+                consoleUtils.help();
+                output = "";
+                helpFlag = true;
+            } else if (result.equals("-x".toUpperCase())) {
+                result = "999";
                 inquiry.close();
-                output = "Exiting...";
             } else {
+                helpFlag = false;
                 System.out.println("");
                 try {
                     System.out.println("Loading Ticker, please wait... ");
@@ -86,14 +102,13 @@ public class FolioRetrieverApplication {
                 }
             }
 
-            if (!result.equals("999") && tokenWorked) {
+            if (!result.equals("999") && tokenWorked && !helpFlag) {
                 if (!output.equals("")) {
                     System.out.println(output);
                     System.out.println("");
                 }
                 consoleUtils.sleeper();
-                System.out.println("What else can I do for you? " +
-                        "(Options: Quote (ex., MSFT), Portfolio ('$'), Exit ('999'): ");
+                System.out.println("What else can I do for you?: ");
             }
         } while (!result.equals("999"));
     }

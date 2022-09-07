@@ -10,10 +10,15 @@ public class ConsoleUtils {
         System.out.println("Welcome to Folio Retriever.");
         sleeper();
         System.out.println("");
-        System.out.println("Menu:");
+        help();
+    }
+
+    public void help() {
         System.out.println("To get a fast quote, enter a stock ticker.");
-        System.out.println("To view your portfolio balance, enter '$'.");
-        System.out.println("To exit, enter '999': ");
+        System.out.println("To view your portfolio balance, enter '-p'.");
+        System.out.println("To edit your API key, enter '-a'.");
+        System.out.println("To edit your portfolio, enter '-e'");
+        System.out.println("To exit, enter '-x': ");
     }
 
     public void sleeper() {
