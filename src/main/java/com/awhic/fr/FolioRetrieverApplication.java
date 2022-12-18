@@ -41,7 +41,6 @@ public class FolioRetrieverApplication {
         String output = "";
         Scanner inquiry = new Scanner(System.in);
         String result;
-        boolean tokenWorked = true;
         boolean helpFlag = false;
         do {
             result = inquiry.next().toUpperCase();
@@ -55,15 +54,28 @@ public class FolioRetrieverApplication {
                     System.out.println("You have reached your API limit of 100 calls per 24 hours, or 3 symbols per request.");
                     result = "999";
                 } catch (InvalidApiTokenException e) {
+                    consoleUtils.sleeper();
                     System.out.println("API Token is missing or invalid.");
-                    result = "999";
-                    tokenWorked = false;
+                    consoleUtils.sleeper();
+                    System.out.println("");
+                    System.out.println("-a");
+                    apiUtils.writeApiKey();
                 }
             } else if (result.equals("-a".toUpperCase())) {
-                //DEVELOPMENT
-                consoleUtils.help();
-                output = "";
-                helpFlag = true;
+                apiUtils.writeApiKey();
+            } else if (result.equals("-a?".toUpperCase())) {
+                try {
+                    System.out.println("Your API key: " + apiUtils.getApiKey());
+                    System.out.println("");
+                } catch (InvalidApiTokenException e) {
+                    output = "";
+                    consoleUtils.sleeper();
+                    System.out.println("No stored API key.");
+                    consoleUtils.sleeper();
+                    System.out.println("");
+                    System.out.println("-a");
+                    apiUtils.writeApiKey();
+                }
             } else if (result.equals("-e".toUpperCase())) {
                 //DEVELOPMENT
                 consoleUtils.help();
@@ -86,6 +98,7 @@ public class FolioRetrieverApplication {
                            dollarFormat.format(singleQuoteService.getTickerPrice(result, apiUtils.getApiKey()));
                 } catch (InvalidTickerException e) {
                     output = "";
+                    consoleUtils.sleeper();
                     System.out.println("Error: Invalid Ticker.");
                     System.out.println();
                 } catch (ApiLimitException e) {
@@ -93,22 +106,25 @@ public class FolioRetrieverApplication {
                     System.out.println("You have reached your API limit of 100 calls per 24 hours.");
                     result = "999";
                 } catch (InvalidApiTokenException | FileNotFoundException e) {
+                    consoleUtils.sleeper();
                     System.out.println("API Token is missing or invalid.");
-                    result = "999";
-                    tokenWorked = false;
-                    output = "";
+                    consoleUtils.sleeper();
+                    System.out.println("");
+                    System.out.println("-a");
+                    apiUtils.writeApiKey();
+
                 } catch (IOException e) {
                     throw new RuntimeException("An Unexpected Error Occurred. Exiting...");
                 }
             }
 
-            if (!result.equals("999") && tokenWorked && !helpFlag) {
+            if (!result.equals("999") && !helpFlag) {
                 if (!output.equals("")) {
                     System.out.println(output);
                     System.out.println("");
                 }
                 consoleUtils.sleeper();
-                System.out.println("What else can I do for you?: ");
+                System.out.println("What else can I do for you? (hint: type '-help'): ");
             }
         } while (!result.equals("999"));
     }

@@ -1,10 +1,6 @@
 package com.awhic.fr.util;
 
 public class ConsoleUtils {
-    public void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-    }
 
     public void welcome() {
         System.out.println("Welcome to Folio Retriever.");
@@ -17,6 +13,7 @@ public class ConsoleUtils {
         System.out.println("To get a fast quote, enter a stock ticker.");
         System.out.println("To view your portfolio balance, enter '-p'.");
         System.out.println("To edit your API key, enter '-a'.");
+        System.out.println("To view your stored API key, enter '-a?'.");
         System.out.println("To edit your portfolio, enter '-e'");
         System.out.println("To exit, enter '-x': ");
     }
