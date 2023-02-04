@@ -9,9 +9,9 @@ import java.text.NumberFormat;
 import java.util.Scanner;
 
 import com.awhic.fr.code.PortfolioRetriever;
-import com.awhic.fr.code.exception.ApiLimitException;
-import com.awhic.fr.code.exception.InvalidApiTokenException;
-import com.awhic.fr.code.exception.InvalidTickerException;
+import com.awhic.fr.exception.ApiLimitException;
+import com.awhic.fr.exception.InvalidApiTokenException;
+import com.awhic.fr.exception.InvalidTickerException;
 import com.awhic.fr.service.SingleQuoteService;
 import com.awhic.fr.util.ApiUtils;
 import com.awhic.fr.util.ConsoleUtils;
@@ -29,12 +29,12 @@ public class FolioRetrieverApplication {
     static NumberFormat dollarFormat = NumberFormat.getCurrencyInstance(new Locale("en", "US"));
     static ApiUtils apiUtils = new ApiUtils();
 
-    public static void main(String[] args) throws URISyntaxException, InterruptedException {
+    public static void main(String[] args) throws URISyntaxException, InterruptedException, IOException {
 
         // Portfolio - temporary
         String[] owned = { "NFLX", "MSFT", "F" };
         Double[] quantityOwned = { 1.0, 10.0, 37.0 };
-        double coreValue = 5000.00;
+        double coreValue = 0.00;
 
         consoleUtils.welcome();
 
@@ -43,88 +43,77 @@ public class FolioRetrieverApplication {
         String result;
         boolean helpFlag = false;
         do {
-            result = inquiry.next().toUpperCase();
+            result = inquiry.nextLine().toUpperCase();
 
-            if (result.equals("-p".toUpperCase())) {
-                System.out.println("Loading Your Portfolio, please wait...");
-                System.out.println("");
+            if (result.equals("p".toUpperCase())) {
                 try {
                     output = PortfolioRetriever.retrieveFolio(owned, quantityOwned, coreValue, singleQuoteService, apiUtils.getApiKey(), dollarFormat);
                 } catch (ApiLimitException e) {
                     System.out.println("You have reached your API limit of 100 calls per 24 hours, or 3 symbols per request.");
                     result = "999";
                 } catch (InvalidApiTokenException e) {
-                    consoleUtils.sleeper();
-                    System.out.println("API Token is missing or invalid.");
-                    consoleUtils.sleeper();
-                    System.out.println("");
-                    System.out.println("-a");
-                    apiUtils.writeApiKey();
+                    if (apiUtils.isEmpty()) {
+                        System.out.println("API Token is missing, please enter a valid API token:");
+                        apiUtils.writeApiKey();
+                    } else {
+                        System.out.println("API Token is invalid.");
+                        result = "999";
+                    }
                 }
-            } else if (result.equals("-a".toUpperCase())) {
+            } else if (result.equals("key-edit".toUpperCase())) {
+                output = "";
                 apiUtils.writeApiKey();
-            } else if (result.equals("-a?".toUpperCase())) {
+            } else if (result.equals("key".toUpperCase())) {
+                output = "";
                 try {
                     System.out.println("Your API key: " + apiUtils.getApiKey());
-                    System.out.println("");
                 } catch (InvalidApiTokenException e) {
                     output = "";
-                    consoleUtils.sleeper();
-                    System.out.println("No stored API key.");
-                    consoleUtils.sleeper();
-                    System.out.println("");
-                    System.out.println("-a");
+                    System.out.println("No stored API key. Enter your API key here: ");
                     apiUtils.writeApiKey();
                 }
-            } else if (result.equals("-e".toUpperCase())) {
+            } else if (result.equals("edit".toUpperCase())) {
                 //DEVELOPMENT
                 consoleUtils.help();
                 output = "";
                 helpFlag = true;
-            } else if (result.equals("-help".toUpperCase())) {
+            } else if (result.equals("help".toUpperCase())) {
                 consoleUtils.help();
                 output = "";
                 helpFlag = true;
-            } else if (result.equals("-x".toUpperCase())) {
+            } else if (result.equals("x".toUpperCase()) || result.equals("exit".toUpperCase())) {
                 result = "999";
                 inquiry.close();
-            } else {
+            } else if (result.toUpperCase().startsWith("T")) {
                 helpFlag = false;
-                System.out.println("");
                 try {
-                    System.out.println("Loading Ticker, please wait... ");
-                    System.out.println("");
-                    output = singleQuoteService.getTickerTitle(result, apiUtils.getApiKey()) + ": " +
-                           dollarFormat.format(singleQuoteService.getTickerPrice(result, apiUtils.getApiKey()));
+                    String ticker = result.substring(1).trim();
+                    output = singleQuoteService.getTickerComplete(ticker, apiUtils.getApiKey(), dollarFormat);
                 } catch (InvalidTickerException e) {
                     output = "";
-                    consoleUtils.sleeper();
-                    System.out.println("Error: Invalid Ticker.");
-                    System.out.println();
+                    System.out.println("Error: Invalid ticker.");
                 } catch (ApiLimitException e) {
                     output = "";
                     System.out.println("You have reached your API limit of 100 calls per 24 hours.");
                     result = "999";
                 } catch (InvalidApiTokenException | FileNotFoundException e) {
-                    consoleUtils.sleeper();
-                    System.out.println("API Token is missing or invalid.");
-                    consoleUtils.sleeper();
-                    System.out.println("");
-                    System.out.println("-a");
-                    apiUtils.writeApiKey();
-
+                    if (apiUtils.isEmpty()) {
+                        System.out.println("API Token is missing, please enter a valid API token:");
+                        apiUtils.writeApiKey();
+                    } else {
+                        System.out.println("API Token is invalid.");
+                        result = "999";
+                    }
                 } catch (IOException e) {
-                    throw new RuntimeException("An Unexpected Error Occurred. Exiting...");
+                    throw new RuntimeException("An unexpected error occurred. Exiting...");
                 }
+            } else {
+                System.out.println("Command not recognized. Type \"help\" for list of commands");
             }
-
             if (!result.equals("999") && !helpFlag) {
                 if (!output.equals("")) {
                     System.out.println(output);
-                    System.out.println("");
                 }
-                consoleUtils.sleeper();
-                System.out.println("What else can I do for you? (hint: type '-help'): ");
             }
         } while (!result.equals("999"));
     }

@@ -1,7 +1,7 @@
 package com.awhic.fr.code;
 
-import com.awhic.fr.code.exception.ApiLimitException;
-import com.awhic.fr.code.exception.InvalidTickerException;
+import com.awhic.fr.exception.ApiLimitException;
+import com.awhic.fr.exception.InvalidTickerException;
 import com.awhic.fr.service.SingleQuoteService;
 
 import java.io.IOException;
@@ -11,7 +11,8 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 
 public class PortfolioRetriever {
-    public static String retrieveFolio(String[] owned, Double[] quantityOwned, double coreValue, SingleQuoteService staticService, String token, NumberFormat format) {
+    public static String retrieveFolio(String[] owned, Double[] quantityOwned, double coreValue,
+                                       SingleQuoteService staticService, String token, NumberFormat format) {
         ArrayList<Double> prices = new ArrayList<>();
         for (String ticker : owned) {
             try {
@@ -24,15 +25,14 @@ public class PortfolioRetriever {
                 throw new ApiLimitException();
             }
         }
-
         int iterate = 0;
         ArrayList<Double> totals = new ArrayList<>();
         for (Double q : quantityOwned) {
             totals.add(q * prices.get(iterate));
             iterate++;
         }
-        totals.add(coreValue);
 
+        totals.add(coreValue);
         Double output = totals.stream().mapToDouble(i -> i).sum();
 
         return "Your Current Portfolio Value: " + format.format(output);

@@ -1,7 +1,7 @@
 package com.awhic.fr.service;
 
-import com.awhic.fr.code.exception.ApiLimitException;
-import com.awhic.fr.code.exception.InvalidTickerException;
+import com.awhic.fr.exception.ApiLimitException;
+import com.awhic.fr.exception.InvalidTickerException;
 import com.awhic.fr.mapper.QuoteMapper;
 import com.awhic.fr.model.Quote;
 import okhttp3.HttpUrl;
@@ -11,6 +11,7 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.text.NumberFormat;
 import java.util.Objects;
 
 public class SingleQuoteService {
@@ -35,7 +36,7 @@ public class SingleQuoteService {
         }
     }
 
-    public String getTickerTitle(String ticker, String token) throws IOException {
+    private String getTickerTitle(String ticker, String token) throws IOException {
         Quote quote = quoteMapper.mapQuote(getTicker(ticker, token));
 
         if (quote.getMeta() == null) {
@@ -61,5 +62,10 @@ public class SingleQuoteService {
         } else {
             throw new InvalidTickerException();
         }
+    }
+
+    public String getTickerComplete(String ticker, String token, NumberFormat format) throws IOException, URISyntaxException, InterruptedException {
+        return getTickerTitle(ticker, token) + ": " +
+                format.format(getTickerPrice(ticker, token));
     }
 }
