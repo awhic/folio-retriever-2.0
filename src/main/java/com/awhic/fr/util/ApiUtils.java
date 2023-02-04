@@ -1,6 +1,6 @@
 package com.awhic.fr.util;
 
-import com.awhic.fr.code.exception.InvalidApiTokenException;
+import com.awhic.fr.exception.InvalidApiTokenException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,18 +31,24 @@ public class ApiUtils {
         System.out.println("Paste your API key here: ");
         Scanner inquiry = new Scanner(System.in);
         String result = inquiry.next();
-        ConsoleUtils consoleUtils = new ConsoleUtils();
 
         try {
             FileWriter fileWriter = new FileWriter("src/main/resources/api-key.txt");
             fileWriter.flush();
             fileWriter.write(result);
             fileWriter.close();
-            consoleUtils.sleeper();
             System.out.println("Success!");
-            System.out.println("");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean isEmpty() {
+        try {
+            getApiKey();
+        } catch (InvalidApiTokenException e) {
+            return true;
+        }
+        return false;
     }
 }

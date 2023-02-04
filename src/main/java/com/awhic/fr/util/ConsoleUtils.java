@@ -3,24 +3,16 @@ package com.awhic.fr.util;
 public class ConsoleUtils {
 
     public void welcome() {
-        System.out.println("Welcome to Folio Retriever.");
-        sleeper();
-        System.out.println("");
-        help();
+        System.out.println("FolioRetriever initialized.");
     }
 
     public void help() {
-        System.out.println("To get a fast quote, enter a stock ticker.");
-        System.out.println("To view your portfolio balance, enter '-p'.");
-        System.out.println("To edit your API key, enter '-a'.");
-        System.out.println("To view your stored API key, enter '-a?'.");
-        System.out.println("To edit your portfolio, enter '-e'");
-        System.out.println("To exit, enter '-x': ");
-    }
+        String helpMessage = "t - Enter \"t\" followed by a space and a stocker ticker to get a fast quote.\n" +
+                "p - View portfolio balance\n" +
+                "key - view API key\n" +
+                "key-edit - edit API key\n" +
+                "edit - edit portfolio";
 
-    public void sleeper() {
-        try {
-            Thread.sleep(1100L);
-        } catch (InterruptedException ignored) { }
+        System.out.println(helpMessage);
     }
 }

@@ -1,7 +1,7 @@
 package com.awhic.fr.service;
 
-import com.awhic.fr.code.exception.ApiLimitException;
-import com.awhic.fr.code.exception.InvalidTickerException;
+import com.awhic.fr.exception.ApiLimitException;
+import com.awhic.fr.exception.InvalidTickerException;
 import com.awhic.fr.mapper.QuoteMapper;
 import com.awhic.fr.model.Data;
 import com.awhic.fr.model.Quote;
