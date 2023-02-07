@@ -5,6 +5,7 @@ import com.awhic.fr.util.CSVUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class PortfolioGenerator {
 
@@ -20,5 +21,25 @@ public class PortfolioGenerator {
             iterate++;
         }
         return ownedMap;
+    }
+
+    public HashMap<Double, String> addStockToPortfolio() {
+        Scanner sc = new Scanner(System.in);
+        HashMap<Double, String> map = new HashMap<>();
+        boolean isFinished = false;
+        while (!isFinished) {
+            System.out.print("Enter the stock ticker: ");
+            String ticker = sc.nextLine();
+            System.out.print("Enter the quantity owned: ");
+            double quantity = sc.nextDouble();
+            sc.nextLine();
+            map.put(quantity, ticker);
+            System.out.print("Would you like to enter another stock? (y/n): ");
+            String response = sc.nextLine().toUpperCase();
+            if (!response.equals("y".toUpperCase())) {
+                isFinished = true;
+            }
+        }
+        return map;
     }
 }

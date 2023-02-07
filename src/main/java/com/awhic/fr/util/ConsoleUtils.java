@@ -9,11 +9,12 @@ public class ConsoleUtils {
     public void help() {
         String helpMessage = "t - Enter \"t\" followed by a space and a stocker ticker to get a fast quote.\n" +
                 "p - View portfolio balance\n" +
-                "p? - View portfolio entries\n" +
-                "key - view API key\n" +
-                "key-edit - edit API key\n" +
-                "edit - edit portfolio";
+                "pd - Display portfolio entries\n" +
+                "k - view API key\n" +
+                "ke - edit API key\n" +
+                "pe - Edit portfolio";
 
+        //TODO: update this, and add exit command
         System.out.println(helpMessage);
     }
 

@@ -14,6 +14,7 @@ import com.awhic.fr.exception.InvalidApiTokenException;
 import com.awhic.fr.exception.InvalidTickerException;
 import com.awhic.fr.service.SingleQuoteService;
 import com.awhic.fr.util.ApiUtils;
+import com.awhic.fr.util.CSVUtils;
 import com.awhic.fr.util.ConsoleUtils;
 
 public class FolioRetrieverApplication {
@@ -57,10 +58,10 @@ public class FolioRetrieverApplication {
                         result = "999";
                     }
                 }
-            } else if (result.equals("key-edit".toUpperCase())) {
+            } else if (result.equals("ke".toUpperCase())) {
                 output = "";
                 apiUtils.writeApiKey();
-            } else if (result.equals("p?".toUpperCase())) {
+            } else if (result.equals("pd".toUpperCase())) {
                 helpFlag = false;
                 HashMap<Double,String> portfolio = portfolioGenerator.getPortfolio();
                 StringBuilder portfolioOutput = new StringBuilder();
@@ -73,7 +74,7 @@ public class FolioRetrieverApplication {
                     iterate++;
                 }
                 output = portfolioOutput.toString();
-            } else if (result.equals("key".toUpperCase())) {
+            } else if (result.equals("k".toUpperCase())) {
                 output = "";
                 try {
                     System.out.println("Your API key: " + apiUtils.getApiKey());
@@ -82,10 +83,9 @@ public class FolioRetrieverApplication {
                     System.out.println("No stored API key. Enter your API key here: ");
                     apiUtils.writeApiKey();
                 }
-            } else if (result.equals("edit".toUpperCase())) {
-                //DEVELOPMENT
-                consoleUtils.help();
-                output = "";
+            } else if (result.equals("pe".toUpperCase())) {
+                CSVUtils csvUtils = new CSVUtils();
+                csvUtils.setOwned(portfolioGenerator.addStockToPortfolio());
                 helpFlag = true;
             } else if (result.equals("help".toUpperCase())) {
                 consoleUtils.help();
