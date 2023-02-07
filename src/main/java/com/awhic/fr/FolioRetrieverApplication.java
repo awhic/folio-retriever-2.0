@@ -2,12 +2,12 @@ package com.awhic.fr;
 
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
-import java.util.Locale;
+import java.util.*;
 
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.Scanner;
 
+import com.awhic.fr.code.PortfolioGenerator;
 import com.awhic.fr.code.PortfolioRetriever;
 import com.awhic.fr.exception.ApiLimitException;
 import com.awhic.fr.exception.InvalidApiTokenException;
@@ -30,24 +30,21 @@ public class FolioRetrieverApplication {
     static ApiUtils apiUtils = new ApiUtils();
 
     public static void main(String[] args) throws URISyntaxException, InterruptedException, IOException {
-
-        // Portfolio - temporary
-        String[] owned = { "NFLX", "MSFT", "F" };
-        Double[] quantityOwned = { 1.0, 10.0, 37.0 };
-        double coreValue = 0.00;
-
-        consoleUtils.welcome();
+        PortfolioGenerator portfolioGenerator = new PortfolioGenerator();
 
         String output = "";
         Scanner inquiry = new Scanner(System.in);
         String result;
         boolean helpFlag = false;
+
+        consoleUtils.welcome();
         do {
             result = inquiry.nextLine().toUpperCase();
 
             if (result.equals("p".toUpperCase())) {
+                helpFlag = false;
                 try {
-                    output = PortfolioRetriever.retrieveFolio(owned, quantityOwned, coreValue, singleQuoteService, apiUtils.getApiKey(), dollarFormat);
+                    output = PortfolioRetriever.retrieveFolio(portfolioGenerator.getPortfolio(), 0.00, singleQuoteService, apiUtils.getApiKey(), dollarFormat);
                 } catch (ApiLimitException e) {
                     System.out.println("You have reached your API limit of 100 calls per 24 hours, or 3 symbols per request.");
                     result = "999";
@@ -63,6 +60,19 @@ public class FolioRetrieverApplication {
             } else if (result.equals("key-edit".toUpperCase())) {
                 output = "";
                 apiUtils.writeApiKey();
+            } else if (result.equals("p?".toUpperCase())) {
+                helpFlag = false;
+                HashMap<Double,String> portfolio = portfolioGenerator.getPortfolio();
+                StringBuilder portfolioOutput = new StringBuilder();
+                int iterate = 0;
+                for (Map.Entry<Double, String> entry : portfolio.entrySet()) {
+                    portfolioOutput.append(entry.getValue()).append(consoleUtils.spacer(entry.getValue(), 6)).append(entry.getKey());
+                    if (iterate < portfolio.entrySet().size() - 1) {
+                        portfolioOutput.append("\n");
+                    }
+                    iterate++;
+                }
+                output = portfolioOutput.toString();
             } else if (result.equals("key".toUpperCase())) {
                 output = "";
                 try {
