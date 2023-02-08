@@ -61,7 +61,7 @@ public class FolioRetrieverApplication {
             } else if (result.equals("ke".toUpperCase())) {
                 output = "";
                 apiUtils.writeApiKey();
-            } else if (result.equals("pd".toUpperCase())) {
+            } else if (result.equals("pv".toUpperCase())) {
                 helpFlag = false;
                 HashMap<Double,String> portfolio = portfolioGenerator.getPortfolio();
                 StringBuilder portfolioOutput = new StringBuilder();
@@ -118,6 +118,7 @@ public class FolioRetrieverApplication {
                     throw new RuntimeException("An unexpected error occurred. Exiting...");
                 }
             } else {
+                output = "";
                 System.out.println("Command not recognized. Type \"help\" for list of commands");
             }
             if (!result.equals("999") && !helpFlag) {

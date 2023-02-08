@@ -5,9 +5,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
 public class CSVUtils {
 
@@ -33,40 +31,38 @@ public class CSVUtils {
         return quantityOwned;
     }
 
-    public void setOwned(HashMap<Double, String> ownedStocks) {
+    public void setOwned(HashMap<Double, String> proposedStocks) {
         try {
             FileWriter keysWriter = new FileWriter("src/main/resources/quantityOwned.csv", true);
             CSVPrinter keysPrinter = new CSVPrinter(keysWriter, CSVFormat.RFC4180);
             FileWriter valuesWriter = new FileWriter("src/main/resources/owned.csv", true);
             CSVPrinter valuesPrinter = new CSVPrinter(valuesWriter, CSVFormat.RFC4180);
 
-            final ArrayList<Double> keyState = getQuantityOwned();
-            final ArrayList<String> valueState = getOwned();
+            ArrayList<Double> keyState = getQuantityOwned();
+            ArrayList<String> valueState = getOwned();
 
-            for (double key : ownedStocks.keySet()) {
-                String value = ownedStocks.get(key);
+            flushCSV("src/main/resources/quantityOwned.csv");
+            flushCSV("src/main/resources/owned.csv");
 
-                if (!valueState.contains(value.toUpperCase())) {
-                    keysPrinter.printRecord(key);
-                    valuesPrinter.printRecord(value.toUpperCase());
-                } else if (valueState.contains(value.toUpperCase()) &&
-                        key != keyState.get(valueState.indexOf(value.toUpperCase()))) {
-                    //TODO: Comment out and throw exception saying editing in dev
-                    flushCSV("src/main/resources/quantityOwned.csv");
-                    flushCSV("src/main/resources/owned.csv");
+            for (double key : proposedStocks.keySet()) {
+                String proposedValue = proposedStocks.get(key).toUpperCase();
 
-                    keyState.remove(valueState.indexOf(value.toUpperCase()));
-                    valueState.remove(value.toUpperCase());
-                    for (double alreadyOwned : keyState) {
-                        keysPrinter.printRecord(alreadyOwned);
-                    }
-                    for (String alreadyOwned : valueState) {
-                        valuesPrinter.printRecord(alreadyOwned);
-                    }
-                    keysPrinter.printRecord(key);
-                    valuesPrinter.printRecord(value.toUpperCase());
+                if (!valueState.contains(proposedValue)) {
+                    keyState.add(key);
+                    valueState.add(proposedValue);
+                } else if (valueState.contains(proposedValue) &&
+                        key != keyState.get(valueState.indexOf(proposedValue))) {
+
+                    keyState.remove(valueState.indexOf(proposedValue));
+                    valueState.remove(proposedValue);
+
+                    keyState.add(key);
+                    valueState.add(proposedValue);
                 }
             }
+
+            keysPrinter.printRecords(keyState);
+            valuesPrinter.printRecords(valueState);
 
             keysPrinter.flush();
             keysPrinter.close();
