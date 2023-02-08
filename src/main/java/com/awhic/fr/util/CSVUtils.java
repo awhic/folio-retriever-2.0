@@ -40,33 +40,29 @@ public class CSVUtils {
             FileWriter valuesWriter = new FileWriter("src/main/resources/owned.csv", true);
             CSVPrinter valuesPrinter = new CSVPrinter(valuesWriter, CSVFormat.RFC4180);
 
+            final ArrayList<Double> keyState = getQuantityOwned();
+            final ArrayList<String> valueState = getOwned();
+
             for (double key : ownedStocks.keySet()) {
                 String value = ownedStocks.get(key);
 
-                //TODO: Meant to check if ticker is present BUT q is different, not working, so close to. Need to flush
-//                ArrayList<Double> keyState = getQuantityOwned();
-//                ArrayList<String> valueState = getOwned();
-//                if (valueState.contains(value.toUpperCase())) {
-//                    if (key != keyState.get(getOwned().indexOf(value.toUpperCase()))) {
-//
-//                        //TODO: remove everything first HERE!!!
-//
-//                        keyState.remove(getOwned().indexOf(value.toUpperCase()));
-//                        valueState.remove(getOwned().indexOf(value.toUpperCase()));
-//                        for (double alreadyOwned : keyState) {
-//                            keysPrinter.printRecord(alreadyOwned);
-//                        }
-//                        for (String alreadyOwned : valueState) {
-//                            valuesPrinter.printRecord(alreadyOwned);
-//                        }
-//                        keysPrinter.printRecord(key);
-//                        valuesPrinter.printRecord(value.toUpperCase());
-//                    }
-//                } else {
-//                    keysPrinter.printRecord(key);
-//                    valuesPrinter.printRecord(value.toUpperCase());
-//                }
-                if (!getOwned().contains(value.toUpperCase())) {
+                if (!valueState.contains(value.toUpperCase())) {
+                    keysPrinter.printRecord(key);
+                    valuesPrinter.printRecord(value.toUpperCase());
+                } else if (valueState.contains(value.toUpperCase()) &&
+                        key != keyState.get(valueState.indexOf(value.toUpperCase()))) {
+                    //TODO: Comment out and throw exception saying editing in dev
+                    flushCSV("src/main/resources/quantityOwned.csv");
+                    flushCSV("src/main/resources/owned.csv");
+
+                    keyState.remove(valueState.indexOf(value.toUpperCase()));
+                    valueState.remove(value.toUpperCase());
+                    for (double alreadyOwned : keyState) {
+                        keysPrinter.printRecord(alreadyOwned);
+                    }
+                    for (String alreadyOwned : valueState) {
+                        valuesPrinter.printRecord(alreadyOwned);
+                    }
                     keysPrinter.printRecord(key);
                     valuesPrinter.printRecord(value.toUpperCase());
                 }
@@ -78,7 +74,17 @@ public class CSVUtils {
             valuesPrinter.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void flushCSV(String path) {
+        try {
+            FileWriter fileWriter = new FileWriter(path);
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
