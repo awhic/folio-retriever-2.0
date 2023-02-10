@@ -28,9 +28,9 @@ public class ApiUtils {
     }
 
     public void writeApiKey() {
-        System.out.println("Paste your API key here: ");
+        System.out.print("Paste your API key here: ");
         Scanner inquiry = new Scanner(System.in);
-        String result = inquiry.next();
+        String result = inquiry.nextLine();
 
         try {
             FileWriter fileWriter = new FileWriter("src/main/resources/api-key.txt");

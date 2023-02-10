@@ -9,12 +9,13 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PortfolioRetriever {
-    public static String retrieveFolio(String[] owned, Double[] quantityOwned, double coreValue,
+    public static String retrieveFolio(HashMap<Double, String> owned, double coreValue,
                                        SingleQuoteService staticService, String token, NumberFormat format) {
         ArrayList<Double> prices = new ArrayList<>();
-        for (String ticker : owned) {
+        for (String ticker : owned.values()) {
             try {
                 prices.add((BigDecimal.valueOf(staticService.getTickerPrice(ticker, token))).doubleValue());
             } catch (InvalidTickerException e) {
@@ -27,7 +28,7 @@ public class PortfolioRetriever {
         }
         int iterate = 0;
         ArrayList<Double> totals = new ArrayList<>();
-        for (Double q : quantityOwned) {
+        for (Double q : owned.keySet()) {
             totals.add(q * prices.get(iterate));
             iterate++;
         }
@@ -35,7 +36,7 @@ public class PortfolioRetriever {
         totals.add(coreValue);
         Double output = totals.stream().mapToDouble(i -> i).sum();
 
-        return "Your Current Portfolio Value: " + format.format(output);
+        return "Portfolio value: " + format.format(output);
     }
 
     // portfolio method using MultiQuoteService. Does not work because data is unsorted and can only request 3 at once. Need workarounds for both issues.
