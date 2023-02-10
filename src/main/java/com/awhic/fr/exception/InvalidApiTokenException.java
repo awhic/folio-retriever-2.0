@@ -1,4 +1,4 @@
-package com.awhic.fr.code.exception;
+package com.awhic.fr.exception;
 
 public class InvalidApiTokenException extends RuntimeException {
     public InvalidApiTokenException() {
