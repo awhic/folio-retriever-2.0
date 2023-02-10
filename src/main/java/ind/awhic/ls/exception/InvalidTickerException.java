@@ -1,4 +1,4 @@
-package com.awhic.fr.exception;
+package ind.awhic.ls.exception;
 
 public class InvalidTickerException extends RuntimeException {
     public InvalidTickerException() {

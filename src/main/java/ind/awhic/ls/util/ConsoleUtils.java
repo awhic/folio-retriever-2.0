@@ -1,4 +1,4 @@
-package com.awhic.fr.util;
+package ind.awhic.ls.util;
 
 public class ConsoleUtils {
 

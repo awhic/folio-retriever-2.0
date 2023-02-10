@@ -1,4 +1,4 @@
-package com.awhic.fr.model;
+package ind.awhic.ls.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

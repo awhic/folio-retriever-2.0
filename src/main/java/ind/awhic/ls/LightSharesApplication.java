@@ -17,7 +17,7 @@ import ind.awhic.ls.util.ApiUtils;
 import ind.awhic.ls.util.CSVUtils;
 import ind.awhic.ls.util.ConsoleUtils;
 
-public class FolioRetrieverApplication {
+public class LightSharesApplication {
     static SingleQuoteService singleQuoteService;
     static {
         try {

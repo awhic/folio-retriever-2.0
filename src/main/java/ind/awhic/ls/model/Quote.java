@@ -1,4 +1,4 @@
-package com.awhic.fr.model;
+package ind.awhic.ls.model;
 
 public class Quote {
     private Meta meta;

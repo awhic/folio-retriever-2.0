@@ -1,4 +1,4 @@
-package com.awhic.fr.util;
+package ind.awhic.ls.util;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
