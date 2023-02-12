@@ -1,4 +1,4 @@
-package com.awhic.fr;
+package ind.awhic.ls;
 
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
@@ -7,17 +7,17 @@ import java.util.*;
 import java.io.IOException;
 import java.text.NumberFormat;
 
-import com.awhic.fr.code.PortfolioGenerator;
-import com.awhic.fr.code.PortfolioRetriever;
-import com.awhic.fr.exception.ApiLimitException;
-import com.awhic.fr.exception.InvalidApiTokenException;
-import com.awhic.fr.exception.InvalidTickerException;
-import com.awhic.fr.service.SingleQuoteService;
-import com.awhic.fr.util.ApiUtils;
-import com.awhic.fr.util.CSVUtils;
-import com.awhic.fr.util.ConsoleUtils;
+import ind.awhic.ls.code.PortfolioGenerator;
+import ind.awhic.ls.code.PortfolioRetriever;
+import ind.awhic.ls.exception.ApiLimitException;
+import ind.awhic.ls.exception.InvalidApiTokenException;
+import ind.awhic.ls.exception.InvalidTickerException;
+import ind.awhic.ls.service.SingleQuoteService;
+import ind.awhic.ls.util.ApiUtils;
+import ind.awhic.ls.util.CSVUtils;
+import ind.awhic.ls.util.ConsoleUtils;
 
-public class FolioRetrieverApplication {
+public class LightSharesApplication {
     static SingleQuoteService singleQuoteService;
     static {
         try {

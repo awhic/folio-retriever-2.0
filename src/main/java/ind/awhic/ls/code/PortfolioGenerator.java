@@ -1,6 +1,6 @@
-package com.awhic.fr.code;
+package ind.awhic.ls.code;
 
-import com.awhic.fr.util.CSVUtils;
+import ind.awhic.ls.util.CSVUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;

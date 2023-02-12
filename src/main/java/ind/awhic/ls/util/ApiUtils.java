@@ -1,6 +1,6 @@
-package com.awhic.fr.util;
+package ind.awhic.ls.util;
 
-import com.awhic.fr.exception.InvalidApiTokenException;
+import ind.awhic.ls.exception.InvalidApiTokenException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
