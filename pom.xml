@@ -8,8 +8,8 @@
   <artifactId>ls</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>folio-retriever</name>
-  <url>https://github.com/awhic/folio-retriever</url>
+  <name>light-shares</name>
+  <url>https://github.com/awhic/light-shares</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

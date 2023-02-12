@@ -3,7 +3,7 @@ package ind.awhic.ls.util;
 public class ConsoleUtils {
 
     public void welcome() {
-        System.out.println("FolioRetriever initialized.");
+        System.out.println("LightShares initialized.");
     }
 
     public void help() {
